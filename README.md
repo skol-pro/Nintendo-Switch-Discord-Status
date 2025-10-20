@@ -8,31 +8,13 @@ the game they're currently playing as their Discord status with Rich Presence.
 
 ![Nintendo Switch Discord Status Screenshot](https://i.imgur.com/PFOYhIX.png)
 
-### With Nintendo Switch Discord Status you can...
-* Show off to non-Switch owners that you are a Nintendo Switch owner across all of Discord.
-* **Search and select from thousands of Nintendo Switch games** with real-time IGDB integration.
-* Get automatic updates with the latest game releases - no more waiting for manual updates!
-* Set a custom status message to let everyone know exactly what you're doing in-game.
-* Type in custom game names for games not yet in the database.
-
-### What's New in v2.0
-This version introduces **live game search with real-time access to the entire Nintendo Switch library**! Instead of a static list of ~300 games, you now have:
-
-* Real-time game search across the entire Nintendo Switch library
-* Game cover art display in the dropdown
-* Modern redesigned interface with improved UX
-* Smart filtering that automatically excludes DLCs
-* Sorted results by release date (newest first)
-* Recent games loaded on startup
-
-**Technical Improvements:**
-* New IGDB API integration with wildcard search
-* Improved error handling and .env file loading
-* Enhanced build system with electron-builder
-* Icon generation tooling for all platforms
-* Optimized package structure
-
-**Note**: The old limitation of Discord's 300 art assets no longer affects game selection. You can search for any Nintendo Switch game! The app uses the generic Nintendo Switch icon for Discord Rich Presence, while game covers are shown in the app itself.
+## Features
+* Show off to non-Switch owners that you are a Nintendo Switch owner across all of Discord
+* **Real-time game search** across the entire Nintendo Switch library
+* **Game cover art display** in the dropdown selector
+* **Always up-to-date** - automatically includes new game releases
+* **Custom status messages** to let everyone know what you're doing in-game
+* Type in custom game names for games not yet in the database
 
 ## Prerequisites
 * [Discord App](https://discordapp.com) installed on your machine
@@ -59,20 +41,6 @@ Required packages: [Node.js](https://nodejs.org/) (v14 or higher recommended).
 5. Generate icons (optional): `npm run generate-icons`
 6. Build the Svelte components: `npm run svelte-build`
 7. Run the application: `npm start`
-
-### Building Distributables
-Build installers for all platforms:
-```bash
-npm run build:all        # All platforms
-npm run build:mac        # macOS only (DMG)
-npm run build:win        # Windows only (EXE)
-npm run build:linux      # Linux only (AppImage)
-```
-
-For development builds (faster, unsigned):
-```bash
-npm run build:mac-unsigned
-```
 
 ## Features & Usage
 1. **Search for Games**: Start typing in the game selector to search the IGDB database
