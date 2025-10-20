@@ -20,7 +20,8 @@ if (app.isPackaged) {
 
 require("dotenv").config({ path: envPath });
 
-const { BrowserWindow, ipcMain } = require("electron");
+const { BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const https = require("https");
 const rpc = require("discord-rich-presence")("647244885203877901");
 const gameData = require("./games");
 const IGDBAuth = require("./src/igdb-auth");
@@ -38,6 +39,53 @@ if (require("./installer-events").handleSquirrelEvent(app)) throw false;
 
 let window;
 let dropdownWindow = null;
+
+// Check for updates
+function checkForUpdates() {
+    const currentVersion = app.getVersion();
+
+    https
+        .get(
+            {
+                hostname: "api.github.com",
+                path: "/repos/skol-pro/Nintendo-Switch-Discord-Status/releases/latest",
+                headers: { "User-Agent": "Nintendo-Switch-Discord-Status" },
+            },
+            (res) => {
+                let data = "";
+                res.on("data", (chunk) => (data += chunk));
+                res.on("end", () => {
+                    try {
+                        const release = JSON.parse(data);
+                        const latestVersion = release.tag_name.replace("v", "");
+
+                        if (latestVersion !== currentVersion) {
+                            dialog
+                                .showMessageBox(window, {
+                                    type: "info",
+                                    title: "Update Available",
+                                    message: `Version ${latestVersion} is available!`,
+                                    detail: `You're currently on version ${currentVersion}.\n\nWould you like to download the update?`,
+                                    buttons: ["Download", "Skip"],
+                                    defaultId: 0,
+                                    cancelId: 1,
+                                })
+                                .then((result) => {
+                                    if (result.response === 0) {
+                                        shell.openExternal(release.html_url);
+                                    }
+                                });
+                        }
+                    } catch (error) {
+                        console.error("[Update Check] Failed:", error);
+                    }
+                });
+            }
+        )
+        .on("error", (error) => {
+            console.error("[Update Check] Network error:", error);
+        });
+}
 
 // Used to create the window
 function createWindow() {
@@ -302,7 +350,13 @@ function setRPC() {
 }
 
 // Events to listen for
-app.on("ready", createWindow);
+app.on("ready", () => {
+    createWindow();
+    // Check for updates 5 seconds after app launches
+    setTimeout(() => {
+        checkForUpdates();
+    }, 5000);
+});
 
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") app.quit();
