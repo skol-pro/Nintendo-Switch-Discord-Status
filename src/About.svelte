@@ -9,67 +9,135 @@
     <button 
       on:click="{() => show = false}"
       class="closeButton"
+      title="Close"
     >
-      X
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
     </button>
   </div>
 
-  <div class=spacer></div>
-
   <div class="aboutContainer left">
       <p>
-        Nintendo Switch Discord Status v{version} was forked by hobby-grade from 'NS-RPC' developed by Da532 in hopes of there being an option for those who want to display their Switch games on Discord. 
-        <br> Shout out to "Electron in Action" by Steve Kinney. Thanks Brandon, Jake, & Owen 
-        <br> Made with &hearts; on DevTerm
+        <strong>Nintendo Switch Discord Status v{version}</strong>
+        <br>Latest enhancements by <a href="https://github.com/skol-pro/Nintendo-Switch-Discord-Status" target="_blank">Skol</a>, introducing live game search with real-time access to the entire Nintendo Switch library.
+        <br><br>
+        <strong>What's New in v2.0:</strong>
+        <br>• Real-time game search across the entire Nintendo Switch library
+        <br>• Game cover art display
+        <br>• Modern redesigned interface
+        <br><br>
+        Originally forked by hobby-grade from 'NS-RPC' developed by Da532.
+        <br>Special thanks to Da532, Nora, and karei for their contributions.
+        <br>Shout out to "Electron in Action" by Steve Kinney.
+        <br><br>
+        <small>IGDB API © Twitch Interactive Inc.</small>
       </p>
   </div>
 </main>
 
 
 <style>
+main {
+  background: linear-gradient(135deg, #e50012, #7289da);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
 .aboutContainer {
-  max-width: 30em;
-  margin: auto 1rem;
-  color: #000;
+  padding: 1.5rem 2rem 2rem 2rem;
+  color: white !important;
+  overflow-y: auto;
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Custom Scrollbar */
+.aboutContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.aboutContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.aboutContainer::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+}
+
+.aboutContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.aboutContainer p {
+  line-height: 1.5;
+  color: white !important;
+}
+
+.aboutContainer strong {
+  color: white !important;
+}
+
+.aboutContainer a {
+  color: #ffd700 !important;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.aboutContainer a:hover {
+  text-decoration: underline;
+}
+
+.aboutContainer small {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.75rem;
 }
 
 .closeButton {
-  background-color: white;
-  color: #e60012;
+  background: none;
+  border: none;
+  color: white;
   width: 2rem;
   height: 2rem;
-  font-size: x-large;
-  border-radius: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: Roboto;
+  cursor: pointer;
   margin-left: auto;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
 }
 
 .closeButton:hover {
-  background-color: #e60012;
-  color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
   
 .left {
   text-align: left;
 }
 
-.spacer {
-  margin-top: 20px;
-}
-
 .aboutHeader {
-  background-color:#e60012;
-  color:white;
-  padding: 0.5em;
+  background: none;
+  color: white !important;
+  padding: 0.5rem 1.5rem;
   font-family: Roboto;
-  font-style: italic;
+  font-weight: 900;
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
+}
+
+.aboutHeader h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: white !important;
 }
 </style>

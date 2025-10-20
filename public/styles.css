@@ -5,8 +5,7 @@
 
 
 html {
-  overflow: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 body {

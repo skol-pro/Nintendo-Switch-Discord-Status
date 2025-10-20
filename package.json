@@ -1,60 +1,132 @@
 {
-  "name": "Nintendo-Switch-Discord-Status",
-  "version": "1.1.5",
-  "description": "A mildly decent way to display your Nintendo Switch games in Discord.",
-  "productName": "Nintendo Switch Discord Status",
-  "main": "index.js",
-  "bin": "index.js",
-  "scripts": {
-    "start": "npm run svelte-build && electron .",
-    "electron": "electron .",
-    "build-mac": "npm run svelte-build && npm run electron-build-mac",
-    "build-win": "npm run svelte-build && npm run electron-build-win",
-    "build-linux": "npm run svelte-build && npm run electron-build-linux",
-    "electron-build-mac": "electron-packager . --platform=darwin --overwrite --out=build --icon=./icon.icns",
-    "electron-build-win": "electron-packager . --platform=win32 --overwrite --out=build --icon=./icon.ico",
-    "electron-build-linux": "electron-packager . --platform=linux --overwrite --out=build --icon=./icon.png",
-    "svelte-build": "rollup -c",
-    "svelte-dev": "rollup -c -w",
-    "svelte-start": "sirv public",
-    "build": "electron-builder build --mac --win --linux --publish never",
-    "deploy": "electron-builder build --mac --win --linux --publish always"
-  },
-  "author": "hobby-grade",
-  "license": "MIT",
-  "dependencies": {
-    "discord-rich-presence": "0.0.8",
-    "electron-updater": "^5.2.1",
-    "sirv-cli": "^2.0.0"
-  },
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "concurrently": "^7.1.0",
-    "electron": "^11.5.0",
-    "electron-builder": "^23.3.3",
-    "electron-packager": "^15.2.0",
-    "electron-winstaller": "^3.0.4",
-    "eslint": "^5.16.0",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.17.2",
-    "eslint-plugin-node": "^9.0.1",
-    "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0",
-    "svelte-select": "^4.4.7"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/hobby-grade/Nintendo-Switch-Discord-Status.git"
-  },
-  "bugs": {
-    "url": "https://github.com/hobby-grade/Nintendo-Switch-Discord-Status/issues"
-  },
-  "homepage": "https://github.com/hobby-grade/Nintendo-Switch-Discord-Status#readme"
+    "name": "Nintendo-Switch-Discord-Status",
+    "version": "2.0.0",
+    "description": "A mildly decent way to display your Nintendo Switch games in Discord.",
+    "productName": "Nintendo Switch Discord Status",
+    "main": "index.js",
+    "bin": "index.js",
+    "scripts": {
+        "start": "npm run svelte-build && electron .",
+        "electron": "electron .",
+        "svelte-build": "rollup -c",
+        "svelte-dev": "rollup -c -w",
+        "svelte-start": "sirv public",
+        "generate-icons": "node generate-icons.js",
+        "build:mac": "npm run svelte-build && rm -rf dist && CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac",
+        "build:mac-unsigned": "npm run svelte-build && rm -rf dist && CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --dir",
+        "build:win": "npm run svelte-build && rm -rf dist && npx electron-builder --win",
+        "build:linux": "npm run svelte-build && rm -rf dist && npx electron-builder --linux",
+        "build:all": "npm run svelte-build && rm -rf dist && CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --win --linux"
+    },
+    "author": "hobby-grade",
+    "license": "MIT",
+    "dependencies": {
+        "discord-rich-presence": "0.0.8",
+        "dotenv": "^17.2.3",
+        "electron-updater": "^5.2.1",
+        "sirv-cli": "^2.0.0"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^17.0.0",
+        "@rollup/plugin-node-resolve": "^11.0.0",
+        "concurrently": "^7.1.0",
+        "electron": "^11.5.0",
+        "electron-builder": "^23.3.3",
+        "electron-packager": "^15.2.0",
+        "electron-winstaller": "^3.0.4",
+        "eslint": "^5.16.0",
+        "eslint-config-standard": "^12.0.0",
+        "eslint-plugin-import": "^2.17.2",
+        "eslint-plugin-node": "^9.0.1",
+        "eslint-plugin-promise": "^4.1.1",
+        "eslint-plugin-standard": "^4.0.0",
+        "icon-gen": "^5.0.0",
+        "rollup": "^2.3.4",
+        "rollup-plugin-css-only": "^3.1.0",
+        "rollup-plugin-livereload": "^2.0.0",
+        "rollup-plugin-svelte": "^7.0.0",
+        "rollup-plugin-terser": "^7.0.0",
+        "svelte": "^3.0.0",
+        "svelte-select": "^4.4.7"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/skol-pro/Nintendo-Switch-Discord-Status.git"
+    },
+    "bugs": {
+        "url": "https://github.com/skol-pro/Nintendo-Switch-Discord-Status/issues"
+    },
+    "homepage": "https://github.com/skol-pro/Nintendo-Switch-Discord-Status#readme",
+    "build": {
+        "appId": "com.nintendo.switch.discord.status",
+        "productName": "Nintendo Switch Discord Status",
+        "npmRebuild": false,
+        "buildDependenciesFromSource": false,
+        "files": [
+            "index.js",
+            "installer-events.js",
+            "games.json",
+            "logo.png",
+            "src/igdb-auth.js",
+            "src/igdb-api.js",
+            "public/**/*",
+            "node_modules/**/*",
+            "!node_modules/electron-builder/**/*",
+            "!node_modules/electron-packager/**/*"
+        ],
+        "extraFiles": [
+            {
+                "from": ".env",
+                "to": ".env"
+            }
+        ],
+        "mac": {
+            "category": "public.app-category.utilities",
+            "icon": "icon.icns",
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                }
+            ]
+        },
+        "win": {
+            "icon": "icon.ico",
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ]
+        },
+        "linux": {
+            "icon": "icon.png",
+            "target": [
+                {
+                    "target": "AppImage",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "category": "Utility"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true
+        },
+        "extraResources": [
+            {
+                "from": ".env.example",
+                "to": ".env.example"
+            }
+        ]
+    }
 }

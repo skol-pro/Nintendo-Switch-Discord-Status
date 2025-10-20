@@ -13,3 +13,9 @@ build.js
 .eslintrc.js
 .DS_STORE
 electron-builder.yml
+
+# Private development notes
+PRIVATE_README.md
+
+# Environment variables with secrets
+.env

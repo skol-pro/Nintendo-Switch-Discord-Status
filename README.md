@@ -1,55 +1,85 @@
 # Nintendo Switch Discord Status
-A moderately okay solution to display what you're playing on Nintendo Switch using Rich Presence on Discord. Thanks to [Da532](https://github.com/Da532), [Nora](https://github.com/UnicorNora), and [karei](https://github.com/kareigu) for making huge contributions to this project. ✌️
+A moderately okay solution to display what you're playing on Nintendo Switch using Rich Presence on Discord.
 
 ## Introduction
 "Nintendo Switch Discord Status" is a somewhat competent fork of ['NS-RPC' (Nintendo Nintendo Switch Discord Status)](https://github.com/Da532/NS-RPC), an Electron app for Windows, Linux, and macOS that allows Switch users to display
 the game they're currently playing as their Discord status with Rich Presence.
 
 
-![Nintendo Switch Discord Status Screenshot](https://i.imgur.com/khhKXvY.png)
+![Nintendo Switch Discord Status Screenshot](https://i.imgur.com/PFOYhIX.png)
 
 ### With Nintendo Switch Discord Status you can...
 * Show off to non-Switch owners that you are a Nintendo Switch owner across all of Discord.
-* Select from a currently-limited-by-discord list of games to show off.
+* **Search and select from thousands of Nintendo Switch games** with real-time IGDB integration.
+* Get automatic updates with the latest game releases - no more waiting for manual updates!
 * Set a custom status message to let everyone know exactly what you're doing in-game.
-* Experience my absolutely disgusting attempt at re-designing a user interface.
+* Type in custom game names for games not yet in the database.
 
-### Missing a game?
-Open an issue on this page and I'll add it as quickly as I can. Thanks to [karei](https://github.com/kareigu) for the ability to type in custom games that use the default 'Home' image. 
+### What's New in v2.0
+This version introduces **live game search with real-time access to the entire Nintendo Switch library**! Instead of a static list of ~300 games, you now have:
 
-### Problems:
-I have been noticing that new releases of the application seem to require a restart of the Discord application, I am not sure why this started happening, but if you notice that art assets aren't loading, try restarting both applications.
+* Real-time game search across the entire Nintendo Switch library
+* Game cover art display in the dropdown
+* Modern redesigned interface with improved UX
+* Smart filtering that automatically excludes DLCs
+* Sorted results by release date (newest first)
+* Recent games loaded on startup
 
-As of right now, I do not know of a way to have more than 300 art assets stored by Discord in order to display artwork for all of the games that are available on the Nintendo Switch. I have not added 300 games to the list yet, but I will attempt to find a way around this limitation in the meantime. The temporary solution is to keep the list updated with the 300 most popular/recent games.
+**Technical Improvements:**
+* New IGDB API integration with wildcard search
+* Improved error handling and .env file loading
+* Enhanced build system with electron-builder
+* Icon generation tooling for all platforms
+* Optimized package structure
 
-Alternatively, the 300 game limit can be exceeded by using generic artwork for any game outside of the 300. The rich presence would then display the title and status of the game, just without the custom game artwork. I can foresee using the generic 'Home' artwork in this case.
-
-If you'd like to leave any suggestions or ideas about this problem, please open an issue on this repo.
-
-I am also attempting to correct the UI errors.
+**Note**: The old limitation of Discord's 300 art assets no longer affects game selection. You can search for any Nintendo Switch game! The app uses the generic Nintendo Switch icon for Discord Rich Presence, while game covers are shown in the app itself.
 
 ## Prerequisites
-All you need is a high tolerance for bad UI and the [Discord App](https://discordapp.com) installed to the same machine.
+* [Discord App](https://discordapp.com) installed on your machine
+* Internet connection (required for game search)
 
 ## Installation
-If you're looking for convenience, you'll find already built copies of Nintendo Switch Discord Status for
-Linux, macOS, and Windows [here](https://github.com/hobby-grade/Nintendo-Switch-Discord-Status/releases). You will need to install the Windows version of the application, and optionally the macOS version of the application. With both of these OSes you will encounter SmartScreen / Gatekeeper. You will need to allow the application through these obstacles to use it.
+Download the latest release for your platform from [GitHub Releases](https://github.com/skol-pro/Nintendo-Switch-Discord-Status/releases):
 
-## Building From source
-Building from source is also possible if you don't value your time.
+* **macOS**: Download the appropriate `.dmg` file for your Mac (Intel or Apple Silicon)
+* **Windows**: Download the `.exe` installer
+* **Linux**: Download the `.AppImage` file
 
-Required packages: [Node.js](https://nodejs.org/).
+**Note for macOS/Windows users**: You may encounter SmartScreen (Windows) or Gatekeeper (macOS) warnings. You'll need to allow the application through these security features to use it.
+
+## Building From Source
+Building from source is straightforward if you have the tools.
+
+Required packages: [Node.js](https://nodejs.org/) (v14 or higher recommended).
 
 1. Once Node.js is installed, git clone or download and extract the source files to your chosen directory.
 2. Open a terminal window in that directory.
-3. To install the application's required dependencies, use the command `npm install`.
-4. Finally, to execute the application you simply need to enter into terminal `npm start`.
+3. Install dependencies: `npm install`
+4. Create a `.env` file with your IGDB API credentials (see `.env.example` for format)
+5. Generate icons (optional): `npm run generate-icons`
+6. Build the Svelte components: `npm run svelte-build`
+7. Run the application: `npm start`
+
+### Building Distributables
+Build installers for all platforms:
+```bash
+npm run build:all        # All platforms
+npm run build:mac        # macOS only (DMG)
+npm run build:win        # Windows only (EXE)
+npm run build:linux      # Linux only (AppImage)
+```
+
+For development builds (faster, unsigned):
+```bash
+npm run build:mac-unsigned
+```
+
+## Features & Usage
+1. **Search for Games**: Start typing in the game selector to search the IGDB database
+2. **Select a Game**: Choose from search results or browse recent releases
+3. **Set Status**: Add a custom message like "Exploring Hyrule" or "Online with friends"
+4. **Submit**: Click submit to update your Discord Rich Presence
+5. **Go Idle**: Click "Idle" to show you're away from the game
 
 ## Need Help?
-Open an issue on this page and I'll get back to you as soon as possible!
-
-## Donations
-If for some reason you'd like to donate, you can use the wallet addresses below:  
-BTC: 37BgqEvSXY47ZnT3g4xDTyeLGUjVffDbkt  
-LTC: LY29oyRb5S9Z5XfzXoWj94iQDrDBXswAtV  
-BAT: 0x394bb3A0eE014ae46988Ebc8B6e26F509E20A0fD  
+Open an issue on this page and I'll get back to you as soon as possible!  

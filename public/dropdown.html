@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>Dropdown</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: transparent;
+      overflow: hidden;
+    }
+    
+    .dropdown {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 3px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .search-container {
+      padding: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+      font-size: 13px;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #e60012;
+    }
+    
+    .dropdown-list {
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    /* Custom Scrollbar */
+    .dropdown-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .dropdown-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .dropdown-list::-webkit-scrollbar-thumb {
+      background: rgba(230, 0, 18, 0.5);
+      border-radius: 3px;
+    }
+    
+    .dropdown-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(230, 0, 18, 0.7);
+    }
+    
+    .dropdown-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      text-align: left;
+    }
+    
+    .dropdown-item:hover {
+      background: rgba(230, 0, 18, 0.1);
+    }
+    
+    .dropdown-item.selected {
+      background: rgba(230, 0, 18, 0.15);
+    }
+    
+    .game-cover-dropdown {
+      width: 32px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    
+    .game-cover-dropdown.placeholder {
+      background: rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .dropdown-game-name {
+      font-size: 14px;
+      color: #333;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-size: 13px;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-size: 14px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="dropdown">
+    <div class="search-container">
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search games..."
+        id="searchInput"
+      />
+    </div>
+    <div class="dropdown-list" id="gameList"></div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    let games = [];
+    let selectedGame = '';
+    let searchTimeout;
+    
+    const searchInput = document.getElementById('searchInput');
+    const gameList = document.getElementById('gameList');
+    
+    ipcRenderer.on('init-dropdown', (event, data) => {
+      games = data.games;
+      selectedGame = data.selectedGame;
+      renderGames(games);
+      searchInput.focus();
+    });
+    
+    ipcRenderer.on('search-results', (event, result) => {
+      if (result.success && result.games) {
+        const igdbGames = result.games.map(game => ({
+          name: game.name,
+          img: 'switch',
+          igdb_id: game.id,
+          cover_url: game.cover_url
+        }));
+        renderGames(igdbGames);
+      }
+    });
+    
+    function renderGames(gameList) {
+      const container = document.getElementById('gameList');
+      container.innerHTML = '';
+      
+      if (!gameList || gameList.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+        noResults.textContent = 'No games found';
+        container.appendChild(noResults);
+        return;
+      }
+      
+      gameList.forEach(game => {
+        const item = document.createElement('button');
+        item.className = 'dropdown-item';
+        if (game.name === selectedGame) {
+          item.classList.add('selected');
+        }
+        
+        if (game.cover_url) {
+          const img = document.createElement('img');
+          img.src = game.cover_url;
+          img.alt = game.name;
+          img.className = 'game-cover-dropdown';
+          item.appendChild(img);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className = 'game-cover-dropdown placeholder';
+          placeholder.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>`;
+          item.appendChild(placeholder);
+        }
+        
+        const name = document.createElement('span');
+        name.className = 'dropdown-game-name';
+        name.textContent = game.name;
+        item.appendChild(name);
+        
+        item.addEventListener('click', () => {
+          ipcRenderer.send('select-game', game);
+        });
+        
+        container.appendChild(item);
+      });
+    }
+    
+    searchInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      
+      if (value.trim().length < 2) {
+        renderGames(games);
+        return;
+      }
+      
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        console.log('[Dropdown] Searching for:', value.trim());
+        ipcRenderer.send('search-games', value.trim());
+      }, 300);
+    });
+
+    // Close dropdown on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        ipcRenderer.send('close-dropdown');
+      }
+    });
+  </script>
+</body>
+</html>
