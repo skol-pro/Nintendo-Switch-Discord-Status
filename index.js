@@ -40,6 +40,22 @@ if (require("./installer-events").handleSquirrelEvent(app)) throw false;
 let window;
 let dropdownWindow = null;
 
+// Compare semantic versions (returns true if v1 > v2)
+function compareVersions(v1, v2) {
+    const parts1 = v1.split(".").map(Number);
+    const parts2 = v2.split(".").map(Number);
+
+    for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+        const num1 = parts1[i] || 0;
+        const num2 = parts2[i] || 0;
+
+        if (num1 > num2) return true;
+        if (num1 < num2) return false;
+    }
+
+    return false; // Versions are equal
+}
+
 // Check for updates
 function checkForUpdates() {
     const currentVersion = app.getVersion();
@@ -59,7 +75,13 @@ function checkForUpdates() {
                         const release = JSON.parse(data);
                         const latestVersion = release.tag_name.replace("v", "");
 
-                        if (latestVersion !== currentVersion) {
+                        // Compare versions properly (semver)
+                        const isNewer = compareVersions(
+                            latestVersion,
+                            currentVersion
+                        );
+
+                        if (isNewer) {
                             dialog
                                 .showMessageBox(window, {
                                     type: "info",
