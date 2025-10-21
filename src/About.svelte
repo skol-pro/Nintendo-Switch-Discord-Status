@@ -3,6 +3,10 @@
   const version = window.require('../package.json').version;
   export let show;
 
+  function closeModal() {
+    show = false;
+  }
+
   function openIssuesPage() {
     shell.openExternal('https://github.com/skol-pro/Nintendo-Switch-Discord-Status/issues');
   }
@@ -16,9 +20,10 @@
   <div class=aboutHeader>
     <h1 class=left> About <span class="version">v{version}</span></h1>
     <button 
-      on:click="{() => show = false}"
+      on:click={closeModal}
       class="closeButton"
       title="Close"
+      type="button"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -140,10 +145,16 @@ main {
   padding: 0.5rem;
   border-radius: 4px;
   transition: background 0.2s;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
 }
 
 .closeButton:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.closeButton:active {
+  background: rgba(255, 255, 255, 0.3);
 }
   
 .left {

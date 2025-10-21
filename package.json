@@ -1,6 +1,6 @@
 {
     "name": "Nintendo-Switch-Discord-Status",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "Display your Nintendo Switch games in Discord with Rich Presence. Features real-time game search across the entire Switch library with IGDB integration and cover art.",
     "productName": "Nintendo Switch Discord Status",
     "main": "index.js",

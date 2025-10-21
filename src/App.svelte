@@ -94,7 +94,14 @@
         }));
         
         games = [home, custom, ...igdbGames];
-        console.log(`✅ Loaded ${igdbGames.length} games from IGDB`);
+        
+        // Check if games have covers (indicates IGDB vs fallback)
+        const hasCover = igdbGames.some(g => g.cover_url);
+        if (hasCover) {
+          console.log(`✅ Loaded ${igdbGames.length} games from IGDB with covers`);
+        } else {
+          console.log(`⚠️ Loaded ${igdbGames.length} games from local fallback (no IGDB)`);
+        }
       } else {
         console.log('⚠️ Using fallback games.json (IGDB unavailable)');
       }
@@ -420,6 +427,8 @@
     right: 0;
     bottom: 0;
     z-index: 1000;
+    pointer-events: auto;
+    -webkit-app-region: no-drag;
   }
 
   /* Main Content */

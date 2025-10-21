@@ -156,6 +156,7 @@
     const gameList = document.getElementById('gameList');
     
     ipcRenderer.on('init-dropdown', (event, data) => {
+      console.log('[Dropdown] Initialized with', data.games.length, 'games');
       games = data.games;
       selectedGame = data.selectedGame;
       renderGames(games);
@@ -171,6 +172,8 @@
           cover_url: game.cover_url
         }));
         renderGames(igdbGames);
+      } else {
+        renderGames([]);
       }
     });
     
@@ -232,8 +235,11 @@
       
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-        console.log('[Dropdown] Searching for:', value.trim());
         ipcRenderer.send('search-games', value.trim());
+        
+        // Show loading state
+        const container = document.getElementById('gameList');
+        container.innerHTML = '<div class="loading">Searching...</div>';
       }, 300);
     });
 
