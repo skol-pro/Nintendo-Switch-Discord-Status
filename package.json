@@ -1,7 +1,7 @@
 {
     "name": "Nintendo-Switch-Discord-Status",
-    "version": "2.1.0",
-    "description": "A mildly decent way to display your Nintendo Switch games in Discord.",
+    "version": "2.1.1",
+    "description": "Display your Nintendo Switch games in Discord with Rich Presence. Features real-time game search across the entire Switch library with IGDB integration and cover art.",
     "productName": "Nintendo Switch Discord Status",
     "main": "index.js",
     "bin": "index.js",
@@ -18,7 +18,7 @@
         "build:linux": "npm run svelte-build && rm -rf dist && npx electron-builder --linux",
         "build:all": "npm run svelte-build && rm -rf dist && CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --win --linux"
     },
-    "author": "hobby-grade",
+    "author": "Skol",
     "license": "MIT",
     "dependencies": {
         "discord-rich-presence": "0.0.8",

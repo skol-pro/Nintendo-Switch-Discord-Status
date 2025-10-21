@@ -1,11 +1,20 @@
 <script>
+  const { shell } = window.require('electron');
   const version = window.require('../package.json').version;
   export let show;
+
+  function openIssuesPage() {
+    shell.openExternal('https://github.com/skol-pro/Nintendo-Switch-Discord-Status/issues');
+  }
+
+  function openGitHubRepo() {
+    shell.openExternal('https://github.com/skol-pro/Nintendo-Switch-Discord-Status');
+  }
 </script>
 
 <main>
   <div class=aboutHeader>
-    <h1 class=left> About </h1>
+    <h1 class=left> About <span class="version">v{version}</span></h1>
     <button 
       on:click="{() => show = false}"
       class="closeButton"
@@ -20,10 +29,9 @@
 
   <div class="aboutContainer left">
       <p>
-        <strong>Nintendo Switch Discord Status v{version}</strong>
-        <br>Latest enhancements by <a href="https://github.com/skol-pro/Nintendo-Switch-Discord-Status" target="_blank">Skol</a>, introducing live game search with real-time access to the entire Nintendo Switch library.
+        Latest enhancements by <button class="linkButton" on:click={openGitHubRepo}>Skol</button>, introducing live game search with real-time access to the entire Nintendo Switch library.
         <br><br>
-        <strong>What's New in v2.0:</strong>
+        <strong>What's New in v2:</strong>
         <br>• Real-time game search across the entire Nintendo Switch library
         <br>• Game cover art display
         <br>• Modern redesigned interface
@@ -31,7 +39,18 @@
         Originally forked by hobby-grade from 'NS-RPC' developed by Da532.
         <br>Special thanks to Da532, Nora, and karei for their contributions.
         <br>Shout out to "Electron in Action" by Steve Kinney.
-        <br><br>
+      </p>
+      <div class="reportIssueContainer">
+        <button class="reportIssueButton" on:click={openIssuesPage}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          Report an Issue
+        </button>
+      </div>
+      <p style="margin-top: 1rem;margin-bottom: 1rem;">
         <small>IGDB API © Twitch Interactive Inc.</small>
       </p>
   </div>
@@ -85,13 +104,20 @@ main {
   color: white !important;
 }
 
-.aboutContainer a {
+.linkButton {
+  background: none;
+  border: none;
   color: #ffd700 !important;
   text-decoration: none;
   font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  display: inline;
 }
 
-.aboutContainer a:hover {
+.linkButton:hover {
   text-decoration: underline;
 }
 
@@ -139,5 +165,43 @@ main {
   margin: 0;
   font-size: 1.1rem;
   color: white !important;
+}
+
+.version {
+  font-weight: 400;
+  opacity: 0.8;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.reportIssueContainer {
+  padding: 1rem 0 0 0;
+  margin-top: 1rem;
+}
+
+.reportIssueButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: white !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reportIssueButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.reportIssueButton svg {
+  flex-shrink: 0;
 }
 </style>

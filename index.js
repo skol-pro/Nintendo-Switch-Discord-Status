@@ -20,7 +20,7 @@ if (app.isPackaged) {
 
 require("dotenv").config({ path: envPath });
 
-const { BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const { BrowserWindow, ipcMain, dialog, shell, Menu } = require("electron");
 const https = require("https");
 const rpc = require("discord-rich-presence")("647244885203877901");
 const gameData = require("./games");
@@ -112,12 +112,13 @@ function checkForUpdates() {
 // Used to create the window
 function createWindow() {
     window = new BrowserWindow({
-        width: 615,
-        height: 340,
+        width: 625,
+        height: 345,
         resizable: false,
         maximizable: false,
         icon: __dirname + "/icon.png",
         show: false,
+        frame: false,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
@@ -255,6 +256,10 @@ ipcMain.on("resize-window", (event, { width, height }) => {
     }
 });
 
+ipcMain.on("close-window", () => {
+    app.quit();
+});
+
 ipcMain.on("select-game", (event, game) => {
     window.webContents.send("game-selected", game);
     if (dropdownWindow) {
@@ -288,10 +293,10 @@ ipcMain.on("search-games", async (event, query) => {
 });
 
 // Executes when game data is received
-ipcMain.on("game", (e, gameName, status, customName, cover) => {
+ipcMain.on("game", (e, gameName, status, customGameName, cover) => {
     name = gameName;
     desc = status;
-    customName = customName;
+    customName = customGameName;
     coverUrl = cover;
     img = gameData.find((g) => g.name === gameName)?.img || "switch";
     setRPC();
@@ -373,6 +378,7 @@ function setRPC() {
 
 // Events to listen for
 app.on("ready", () => {
+    Menu.setApplicationMenu(false);
     createWindow();
     // Check for updates 5 seconds after app launches
     setTimeout(() => {

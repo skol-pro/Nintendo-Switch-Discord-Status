@@ -24,6 +24,29 @@
   let showAbout = false;
   let isLoadingPopular = true;
   let gameSearchResults = [];
+  let persistedCoverUrl = null;
+  let isIdle = false;
+  let submitAnimating = false;
+  let idleAnimating = false;
+
+  // Load persisted game selection from localStorage
+  const persistedGame = localStorage.getItem('lastSelectedGame');
+  const persistedCover = localStorage.getItem('lastSelectedCover');
+  const persistedStatus = localStorage.getItem('lastStatusMessage');
+  const persistedCustomName = localStorage.getItem('lastCustomGameName');
+  
+  if (persistedGame) {
+    selectedGame = persistedGame;
+  }
+  if (persistedCover) {
+    persistedCoverUrl = persistedCover;
+  }
+  if (persistedStatus) {
+    statusMessage = persistedStatus;
+  }
+  if (persistedCustomName) {
+    customGameName = persistedCustomName;
+  }
 
   // Handle Escape key to close modal
   function handleKeydown(event) {
@@ -35,14 +58,25 @@
   // Get current game cover for display
   $: currentGameData = games.find(g => g.name === selectedGame) 
                     || gameSearchResults.find(g => g.name === selectedGame);
-  $: coverImage = currentGameData?.cover_url || null;
+  // Don't show cover for Custom game
+  $: coverImage = selectedGame === 'Custom' ? null : (currentGameData?.cover_url || persistedCoverUrl || null);
   
-  // Resize window when Custom is selected
+  // Persist selected game and resize window when Custom is selected
   $: {
+    // Save game name and cover URL to localStorage whenever selection changes
+    localStorage.setItem('lastSelectedGame', selectedGame);
+    
+    const selectedGameData = games.find(g => g.name === selectedGame) 
+                          || gameSearchResults.find(g => g.name === selectedGame);
+    if (selectedGameData?.cover_url) {
+      localStorage.setItem('lastSelectedCover', selectedGameData.cover_url);
+      persistedCoverUrl = selectedGameData.cover_url;
+    }
+    
     if (selectedGame === 'Custom') {
-      ipcRenderer.send('resize-window', { width: 615, height: 390 });
+      ipcRenderer.send('resize-window', { width: 625, height: 395 });
     } else {
-      ipcRenderer.send('resize-window', { width: 615, height: 340 });
+      ipcRenderer.send('resize-window', { width: 625, height: 345 });
     }
   }
 
@@ -69,20 +103,67 @@
       console.log('⚠️ Using fallback games.json');
     } finally {
       isLoadingPopular = false;
+      
+      // Auto-submit if a game was restored from localStorage
+      if (persistedGame && persistedGame !== 'Home') {
+        handleSubmit();
+      }
     }
   });
 
   function handleSubmit() {
+    // Trigger animation immediately
+    submitAnimating = true;
+    setTimeout(() => {
+      submitAnimating = false;
+    }, 600);
+    
     const selectedGameData = games.find(g => g.name === selectedGame) 
                           || gameSearchResults.find(g => g.name === selectedGame);
-    const coverUrl = selectedGameData?.cover_url || '';
+    const coverUrl = selectedGameData?.cover_url || persistedCoverUrl || '';
     console.log('[App] Submitting game:', selectedGame, 'with cover:', coverUrl);
+    
+    // Persist status and custom name
+    localStorage.setItem('lastStatusMessage', statusMessage);
+    localStorage.setItem('lastCustomGameName', customGameName);
+    
+    // User is no longer idle after submitting
+    isIdle = false;
+    
     ipcRenderer.send('game', selectedGame, statusMessage, customGameName, coverUrl);
   }
 
   function handleIdle() {
+    // Trigger animation immediately
+    idleAnimating = true;
+    setTimeout(() => {
+      idleAnimating = false;
+    }, 600);
+    
     clicks++;
+    isIdle = true;
+    
     ipcRenderer.send("idle", clicks);
+  }
+
+  function clearStatus() {
+    statusMessage = '';
+    localStorage.setItem('lastStatusMessage', '');
+    if (!isIdle) {
+      handleSubmit();
+    }
+  }
+
+  function clearCustomName() {
+    customGameName = '';
+    localStorage.setItem('lastCustomGameName', '');
+    if (!isIdle) {
+      handleSubmit();
+    }
+  }
+
+  function closeWindow() {
+    ipcRenderer.send('close-window');
   }
 </script>
 
@@ -92,22 +173,31 @@
   <!-- Header -->
   <header>
     <div class="header-left">
-      <img src="../logo.png" alt="Nintendo Switch" class="logo" />
+      <img src="../logo.png" alt="Nintendo Switch" class="logo" draggable="false" />
       <h1>
         Nintendo Switch <strong>Discord Status</strong>
-        <span class="version">v{version}</span>
       </h1>
     </div>
+    
+    <div class="header-right">
+      <!-- Info Icon -->
+      <button class="info-icon" on:click="{() => showAbout = !showAbout}" title="About">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </button>
+      
+      <!-- Close Icon -->
+      <button class="close-icon" on:click="{closeWindow}" title="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
   </header>
-
-  <!-- Info Icon - Positioned absolutely top-right -->
-  <button class="info-icon" on:click="{() => showAbout = !showAbout}" title="About">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="12" y1="16" x2="12" y2="12"></line>
-      <line x1="12" y1="8" x2="12.01" y2="8"></line>
-    </svg>
-  </button>
 
   <!-- About Modal -->
   {#if showAbout}
@@ -121,7 +211,7 @@
     <!-- Left: Game Cover -->
     <div class="cover-container">
       {#if coverImage}
-        <img src={coverImage} alt={selectedGame} class="game-cover" />
+        <img src={coverImage} alt={selectedGame} class="game-cover" draggable="false" />
       {:else}
         <div class="game-cover placeholder">
           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -151,33 +241,53 @@
         <!-- Status Input -->
         <div class="form-group">
           <label for="status">Status</label>
-          <input 
-            type="text" 
-            id="status" 
-            class="form-input"
-            placeholder="Online, Karting with friends, etc."
-            bind:value={statusMessage}
-          />
+          <div class="input-with-clear">
+            <input 
+              type="text" 
+              id="status" 
+              class="form-input"
+              placeholder="Online, Karting with friends, etc."
+              bind:value={statusMessage}
+            />
+            {#if statusMessage}
+              <button type="button" class="clear-btn" on:click={clearStatus} title="Clear">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            {/if}
+          </div>
         </div>
 
         <!-- Custom Game Name (if Custom selected) -->
         {#if selectedGame === 'Custom'}
           <div class="form-group">
             <label for="customGame">Custom Game Name</label>
-            <input 
-              type="text" 
-              id="customGame" 
-              class="form-input"
-              placeholder="Enter game name"
-              bind:value={customGameName}
-            />
+            <div class="input-with-clear">
+              <input 
+                type="text" 
+                id="customGame" 
+                class="form-input"
+                placeholder="Enter game name"
+                bind:value={customGameName}
+              />
+              {#if customGameName}
+                <button type="button" class="clear-btn" on:click={clearCustomName} title="Clear">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              {/if}
+            </div>
           </div>
         {/if}
 
         <!-- Buttons -->
         <div class="button-group">
-          <button type="button" class="btn btn-idle" on:click={handleIdle}>Idle</button>
-          <button type="submit" class="btn btn-submit">Submit</button>
+          <button type="button" class="btn btn-idle" class:animating={idleAnimating} on:click={handleIdle}><span>Idle</span></button>
+          <button type="submit" class="btn btn-submit" class:animating={submitAnimating}><span>Submit</span></button>
         </div>
       </form>
     </div>
@@ -219,15 +329,16 @@
   }
 
   main {
-    width: 615px;
+    width: 625px;
     height: 100%;
-    min-height: 340px;
-    padding: 25px 40px;
+    min-height: 345px;
+    padding: 45px 50px 10px 50px;
     box-sizing: border-box;
     background: linear-gradient(135deg, #e50012 0%, #7289da 100%);
     color: #fff;
     overflow: hidden;
     position: relative;
+    -webkit-app-region: drag;
   }
 
   /* Header */
@@ -235,11 +346,13 @@
     height: 30px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     margin-bottom: 27px;
     position: relative;
     background: none !important;
     padding: 0 !important;
+    -webkit-app-region: drag;
+    user-select: none;
   }
 
   .header-left {
@@ -271,17 +384,15 @@
     color: #fff;
   }
 
-  .version {
-    font-size: 10px;
-    font-weight: 900 !important;
-    margin-left: 8px;
-    opacity: 0.85;
+  .header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
   }
 
-  .info-icon {
-    position: absolute;
-    top: 25px;
-    right: 40px;
+  .info-icon,
+  .close-icon {
+    -webkit-app-region: no-drag;
     background: rgba(255, 255, 255, 0.15);
     border: none;
     border-radius: 50%;
@@ -296,7 +407,8 @@
     z-index: 100;
   }
 
-  .info-icon:hover {
+  .info-icon:hover,
+  .close-icon:hover {
     background: rgba(255, 255, 255, 0.25);
   }
 
@@ -315,6 +427,7 @@
     display: flex;
     gap: 40px;
     align-items: flex-start;
+    pointer-events: none;
   }
 
   /* Cover */
@@ -327,6 +440,7 @@
     border-radius: 8px;
     object-fit: cover;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    user-select: none;
   }
 
   .game-cover.placeholder {
@@ -342,6 +456,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
   }
 
   form {
@@ -371,6 +487,37 @@
     font-size: 11px;
     opacity: 0.7;
     font-style: italic;
+  }
+
+  .input-with-clear {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .input-with-clear .form-input {
+    flex: 1;
+    width: 100%;
+    padding-right: 32px;
+  }
+
+  .clear-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+  }
+
+  .clear-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .form-input {
@@ -422,15 +569,70 @@
     font-weight: 500;
     font-family: 'Roboto', sans-serif;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: all 0.15s ease;
+    position: relative;
   }
 
-  .btn:hover {
+  .btn:hover:not(.animating) {
     background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
   }
 
   .btn:active {
     background: rgba(255, 255, 255, 0.2);
+    transform: translateY(1px) scale(0.98);
+  }
+
+  .btn.animating {
+    /* Animation handled by ::after pseudo-element */
+  }
+
+  .btn.animating::after {
+    content: '\f01e';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #fff;
+    animation: iconPopFade 0.6s ease-out forwards, iconRotate 0.6s linear forwards;
+    pointer-events: none;
+    transform-origin: center center;
+  }
+
+  .btn.animating::before {
+    display: none;
+  }
+
+  .btn span {
+    position: relative;
+    z-index: 2;
+  }
+
+  @keyframes iconPopFade {
+    0% {
+      opacity: 0;
+      transform: translateY(-50%) scale(0.5) rotate(0deg);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-50%) scale(1.2) rotate(108deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-50%) scale(1) rotate(360deg);
+    }
+  }
+
+  @keyframes iconRotate {
+    0% {
+      transform: translateY(-50%) rotate(0deg);
+    }
+    100% {
+      transform: translateY(-50%) rotate(360deg);
+    }
   }
 
   /* Hide GameList's custom styles - it will be plain */
