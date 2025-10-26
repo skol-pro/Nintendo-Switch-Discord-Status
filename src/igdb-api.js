@@ -11,6 +11,7 @@ class IGDBAPI {
         this.baseUrl = "api.igdb.com";
         this.apiVersion = "v4";
         this.NINTENDO_SWITCH_PLATFORM_ID = 130;
+        this.NINTENDO_SWITCH_2_PLATFORM_ID = 471;
     }
 
     /**
@@ -83,26 +84,47 @@ class IGDBAPI {
             return [];
         }
 
-        // APICalypse query
-        // Note: Using name contains instead of search for better results
-        // We filter by: Nintendo Switch platform, exclude games with parent (DLCs/expansions)
-        const query = `
-            fields name,cover.image_id,first_release_date,parent_game;
-            where platforms = (${this.NINTENDO_SWITCH_PLATFORM_ID}) 
-                & name ~ *"${searchTerm.replace(/"/g, '\\"')}"*;
-            sort first_release_date desc;
+        // Try three search strategies:
+        // 1. Search operator on Switch platforms (best for fuzzy matching)
+        // 2. Name contains on Switch platforms (catches exact matches)
+        // 3. All platforms (fallback for games not yet tagged with Switch platform)
+
+        let query = `
+            search "${searchTerm.replace(/"/g, '\\"')}";
+            fields name,cover.image_id,first_release_date,parent_game,platforms;
+            where platforms = (${this.NINTENDO_SWITCH_PLATFORM_ID}, ${
+            this.NINTENDO_SWITCH_2_PLATFORM_ID
+        });
             limit ${limit};
         `.trim();
 
-        console.log("[IGDB API] Query:", query);
-
         try {
-            const games = await this.makeRequest("games", query);
+            let games = await this.makeRequest("games", query);
 
-            console.log(
-                "[IGDB API] Raw result:",
-                JSON.stringify(games).substring(0, 200)
-            );
+            // If search operator returns no results, try name contains
+            if (games.length === 0) {
+                query = `
+                    fields name,cover.image_id,first_release_date,parent_game,platforms;
+                    where platforms = (${this.NINTENDO_SWITCH_PLATFORM_ID}, ${
+                    this.NINTENDO_SWITCH_2_PLATFORM_ID
+                })
+                        & name ~ *"${searchTerm.replace(/"/g, '\\"')}"*;
+                    limit ${limit};
+                `.trim();
+
+                games = await this.makeRequest("games", query);
+            }
+
+            // If still no results, search without platform filter
+            if (games.length === 0) {
+                query = `
+                    search "${searchTerm.replace(/"/g, '\\"')}";
+                    fields name,cover.image_id,first_release_date,parent_game,platforms;
+                    limit ${limit};
+                `.trim();
+
+                games = await this.makeRequest("games", query);
+            }
 
             // Filter out DLCs/expansions (games with parent_game) and transform results
             return games
@@ -127,7 +149,7 @@ class IGDBAPI {
     async getPopularGames(limit = 50) {
         const query = `
             fields name,cover.image_id,first_release_date;
-            where platforms = (${this.NINTENDO_SWITCH_PLATFORM_ID}) 
+            where platforms = (${this.NINTENDO_SWITCH_PLATFORM_ID}, ${this.NINTENDO_SWITCH_2_PLATFORM_ID}) 
                 & parent_game = null
                 & first_release_date != null;
             sort first_release_date desc;

@@ -498,24 +498,14 @@ function setRPC() {
         }
     }
 
-    // Log for debugging
-    console.log("[RPC] Setting presence:", {
-        game: name,
-        coverUrl: coverUrl,
-        fallbackImg: img,
-    });
-
-    // Try using direct HTTPS URL (some RPC implementations support this)
-    // If it doesn't work, it will fall back to the asset key
+    // Determine image key to use
     let imageKey = img;
 
-    if (coverUrl && coverUrl.startsWith("http")) {
-        // Try different formats that might work:
-        // 1. Direct URL (some clients support this)
-        // 2. mp: prefix (Discord Gateway API)
-        // 3. external/ prefix (some implementations)
-        imageKey = coverUrl; // Try direct URL first
-        console.log("[RPC] Attempting external image:", imageKey);
+    // For Custom games, always use the default switch icon
+    if (name === "Custom") {
+        imageKey = "switch";
+    } else if (coverUrl && coverUrl.startsWith("http")) {
+        imageKey = coverUrl;
     }
 
     rpc.updatePresence({

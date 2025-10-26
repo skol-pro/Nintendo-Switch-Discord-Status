@@ -94,20 +94,11 @@
         }));
         
         games = [home, custom, ...igdbGames];
-        
-        // Check if games have covers (indicates IGDB vs fallback)
-        const hasCover = igdbGames.some(g => g.cover_url);
-        if (hasCover) {
-          console.log(`✅ Loaded ${igdbGames.length} games from IGDB with covers`);
-        } else {
-          console.log(`⚠️ Loaded ${igdbGames.length} games from local fallback (no IGDB)`);
-        }
       } else {
-        console.log('⚠️ Using fallback games.json (IGDB unavailable)');
+        // Using fallback games.json
       }
     } catch (error) {
       console.error('Failed to load IGDB games:', error);
-      console.log('⚠️ Using fallback games.json');
     } finally {
       isLoadingPopular = false;
       
@@ -127,8 +118,8 @@
     
     const selectedGameData = games.find(g => g.name === selectedGame) 
                           || gameSearchResults.find(g => g.name === selectedGame);
-    const coverUrl = selectedGameData?.cover_url || persistedCoverUrl || '';
-    console.log('[App] Submitting game:', selectedGame, 'with cover:', coverUrl);
+    // For Custom games, don't use any cover URL
+    const coverUrl = selectedGame === 'Custom' ? '' : (selectedGameData?.cover_url || persistedCoverUrl || '');
     
     // Persist status and custom name
     localStorage.setItem('lastStatusMessage', statusMessage);
@@ -337,8 +328,7 @@
 
   main {
     width: 625px;
-    height: 100%;
-    min-height: 345px;
+    height: 100vh;
     padding: 45px 50px 10px 50px;
     box-sizing: border-box;
     background: linear-gradient(135deg, #e50012 0%, #7289da 100%);
